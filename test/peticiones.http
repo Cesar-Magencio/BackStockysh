@@ -1,16 +1,16 @@
 @usersp = http://localhost:3000/user/usersp
-@logIn = http://localhost:3000/user/logIn
+@login = http://localhost:3000/user/logIn
 @getMaterias = http://localhost:3000/user/getMaterias
 @createMateria = http://localhost:3000/user/createMateria
 @Cursar = http://localhost:3000/user/Cursar
 
 @getMateriaId = http://localhost:3000/user/getMateriasByID/1
 
-POST {{logIn}}
+POST {{login}}
 Content-Type: application/json
 
 {
-    "dni":"4",
+    "dni":"666",
     "contra":"1234"
 }
 
@@ -21,7 +21,7 @@ Content-Type: application/json
 #body
 
 {
-    "dni":"4",
+    "dni":"666",
     "nombre":"juan",
     "contra":"1234"
 }
@@ -50,7 +50,7 @@ auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI0IiwiaWF0IjoxNzE4NzY5MjYwL
 
 {
     "dni": "1",
-    "materias_ids": [1, 2, 3]
+    "materias_ids": [1, 2 ]
 }
 
 

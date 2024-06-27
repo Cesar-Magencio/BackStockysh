@@ -19,18 +19,14 @@ const validate = async (campo, valor, tabla, cnn) => {
 };
 
 // Función para iniciar sesión
+// Función para iniciar sesión
 export const logIn = async (req, res) => {
   try {
     const { dni, contra } = req.body;
-
-    const token = getToken({ dni: dni });
-    return res.status(200).json({ token: token });
-
     const connection = await connect();
     const q = "SELECT contra FROM alumno WHERE dni=?";
     const value = [dni];
     const [result] = await connection.query(q, value);
-    console.log(result);
 
     if (result.length > 0) {
       if (result[0].contra === contra) {
@@ -46,7 +42,7 @@ export const logIn = async (req, res) => {
     } else {
       return res
         .status(400)
-        .json({ message: "el user no existe", success: false });
+        .json({ message: "el usuario no existe", success: false });
     }
   } catch (error) {
     res.status(500).json({ message: "fallo en el catch", error: error });
