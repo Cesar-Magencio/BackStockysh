@@ -1,16 +1,16 @@
 @usersp = http://localhost:3000/user/usersp
 @login = http://localhost:3000/user/logIn
-@getMaterias = http://localhost:3000/user/getMaterias
-@createMateria = http://localhost:3000/user/createMateria
+@getproductos= http://localhost:3000/user/getproductos
+@createProducto = http://localhost:3000/user/createProducto
 @Cursar = http://localhost:3000/user/Cursar
 
-@getMateriaId = http://localhost:3000/user/getMateriasByID/1
+@getproductosId = http://localhost:3000/user/getMproductosByID/1
 
 POST {{login}}
 Content-Type: application/json
 
 {
-    "dni":"666",
+    "dni":"6667",
     "contra":"1234"
 }
 
@@ -21,23 +21,23 @@ Content-Type: application/json
 #body
 
 {
-    "dni":"666",
-    "nombre":"juan",
+    "dni":"6667",
+    "nombre":"juansito",
     "contra":"1234"
 }
 
 ###
 
-GET {{getMaterias}}
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI0IiwiaWF0IjoxNzE4NzE0NTA4LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.pZbSmprQIlPzOYcY_g4AwsR0GbRdQ1AmJOpCgGgRjvM
+GET {{{{getproductos}}}}
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3ODIsImV4cCI6My4zMzMzMzMzMzMzMzMzMzRlKzI5fQ.hzS9pe4_vb9cNVud6_1dN35x2GMSsPNylc5lmZ89aoQ
 ###
 
-POST {{createMateria}}
+POST {{{{createProducto}}}}
 Content-Type: application/json
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI0IiwiaWF0IjoxNzE4NzE0NTA4LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.pZbSmprQIlPzOYcY_g4AwsR0GbRdQ1AmJOpCgGgRjvM
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3ODIsImV4cCI6My4zMzMzMzMzMzMzMzMzMzRlKzI5fQ.hzS9pe4_vb9cNVud6_1dN35x2GMSsPNylc5lmZ89aoQ
 
 {
-    "nombre_materia": "matematicas"
+    "nombre_producto": "Cartera Juanita Jo"
 
 }
 
@@ -46,19 +46,19 @@ auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI0IiwiaWF0IjoxNzE4NzE0NTA4L
 
 POST {{Cursar}}
 Content-Type: application/json
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI0IiwiaWF0IjoxNzE4NzY5MjYwLCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.IvNHjeTP_evH1LJBqEybd8mhPbkN6GvmTPbFGftvTz4
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3ODIsImV4cCI6My4zMzMzMzMzMzMzMzMzMzRlKzI5fQ.hzS9pe4_vb9cNVud6_1dN35x2GMSsPNylc5lmZ89aoQ
 
 {
-    "dni": "1",
+    "dni": "666",
     "materias_ids": [1, 2 ]
 }
 
 
 #####################################################33
 
-GET {{getMateriaId}}
+GET {{getproductosId}}
 Content-Type: application/json
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI0IiwiaWF0IjoxNzE4NzY5MjYwLCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.IvNHjeTP_evH1LJBqEybd8mhPbkN6GvmTPbFGftvTz4
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3ODIsImV4cCI6My4zMzMzMzMzMzMzMzMzMzRlKzI5fQ.hzS9pe4_vb9cNVud6_1dN35x2GMSsPNylc5lmZ89aoQ
 
 
 

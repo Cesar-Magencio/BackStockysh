@@ -24,7 +24,7 @@ export const logIn = async (req, res) => {
   try {
     const { dni, contra } = req.body;
     const connection = await connect();
-    const q = "SELECT contra FROM alumno WHERE dni=?";
+    const q = "SELECT contra FROM perfil WHERE dni=?";
     const value = [dni];
     const [result] = await connection.query(q, value);
 
@@ -55,13 +55,13 @@ export const createUsers = async (req, res) => {
     const cnn = await connect();
     const { dni, nombre, contra } = req.body;
 
-    const userExist = await validate("dni", dni, "alumno", cnn);
+    const userExist = await validate("dni", dni, "perfil", cnn);
     if (userExist) {
       return res.status(400).json({ message: "el usuario ya existe" });
     }
 
     const [result] = await cnn.query(
-      "INSERT INTO alumno (dni, nombre, contra) VALUES (?, ?, ?)",
+      "INSERT INTO perfil (dni, nombre, contra) VALUES (?, ?, ?)",
       [dni, nombre, contra]
     );
 
@@ -94,52 +94,52 @@ export const auth = (req, res, next) => {
   });
 };
 
-// Función para obtener la lista de materias por DNI
-export const getMateriasbyDni = (req, res) => {
+// Función para obtener la lista de productos por DNI
+export const getproductosbyDni = (req, res) => {
   const dni = req.payload;
   console.log(dni);
 
-  const materias = [
-    { id: 1, nombre: "so2" },
-    { id: 2, nombre: "web" },
-    { id: 3, nombre: "webd" },
-    { id: 4, nombre: "arquitectura" },
+  const productos = [
+    { id: 1, nombre: "Zapatos Paruolo" },
+    { id: 2, nombre: "Vestido Maria Cher" },
+    { id: 3, nombre: "Tacos Sarkany" },
+    { id: 4, nombre: "Jean Ay Not Dead" },
   ];
-  return res.status(200).json(materias);
+  return res.status(200).json(productos);
 };
 
-// Función para crear una materia en la base de datos
-export const createMateria = async (req, res) => {
+// Función para crear una producto en la base de datos
+export const createProducto = async (req, res) => {
   try {
     const cnn = await connect();
-    const { nombre_materia } = req.body;
+    const { nombre_producto } = req.body;
 
-    const materiaExistente = await validate(
-      "nombre_materia",
-      nombre_materia,
-      "materia",
+    const productoExistente = await validate(
+      "nombre_producto",
+      nombre_producto,
+      "producto",
       cnn
     );
 
-    if (materiaExistente) {
+    if (productoExistente) {
       return res
         .status(400)
-        .json({ message: "La materia ya existe", success: false });
+        .json({ message: "La producto ya existe", success: false });
     }
 
     const [result] = await cnn.query(
-      "INSERT INTO materia (nombre_materia) VALUES (?)",
-      [nombre_materia]
+      "INSERT INTO producto (nombre_producto) VALUES (?)",
+      [nombre_producto]
     );
 
     if (result.affectedRows === 1) {
       return res
         .status(200)
-        .json({ message: "Se creó la materia", success: true });
+        .json({ message: "Se creó la producto", success: true });
     } else {
       return res
         .status(500)
-        .json({ message: "No se creó la materia", success: false });
+        .json({ message: "No se creó la producto", success: false });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message, success: false });
@@ -148,28 +148,28 @@ export const createMateria = async (req, res) => {
 
 ///////////////////////////////////////////////////////////////////////
 
-// Función para asignar materias a un alumno
-// Función para asignar materias a un alumno
-// Función para asignar materias a un alumno
+// Función para asignar productos a un perfil
+// Función para asignar productos a un perfil
+// Función para asignar productos a un perfil
 export const Cursar = async (req, res) => {
   try {
-    const { dni, materias_ids } = req.body;
+    const { dni, productos_ids } = req.body;
     const cnn = await connect();
 
-    // Validar si el alumno existe
-    const alumnoExiste = await validate("dni", dni, "alumno", cnn);
-    if (!alumnoExiste) {
+    // Validar si el perfil existe
+    const perfilExiste = await validate("dni", dni, "perfil", cnn);
+    if (!perfilExiste) {
       return res
         .status(400)
-        .json({ message: "El alumno no existe", success: false });
+        .json({ message: "El perfil no existe", success: false });
     }
 
-    // Asignar materias al alumno
-    for (const id_m of materias_ids) {
-      const materiaExiste = await validate("id_m", id_m, "materia", cnn);
-      if (!materiaExiste) {
+    // Asignar productos al perfil
+    for (const id_m of productos_ids) {
+      const productoExiste = await validate("id_m", id_m, "producto", cnn);
+      if (!productoExiste) {
         return res.status(400).json({
-          message: `La materia con id ${id_m} no existe`,
+          message: `La producto con id ${id_m} no existe`,
           success: false,
         });
       }
@@ -180,7 +180,7 @@ export const Cursar = async (req, res) => {
 
       if (result.affectedRows !== 1) {
         return res.status(500).json({
-          message: `No se pudo asignar la materia con id ${id_m} al alumno`,
+          message: `No se pudo asignar la producto con id ${id_m} al perfil`,
           success: false,
         });
       }
@@ -188,43 +188,43 @@ export const Cursar = async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Materias asignadas correctamente", success: true });
+      .json({ message: "productos asignadas correctamente", success: true });
   } catch (error) {
     return res.status(500).json({ message: "Fallo en catch", error: error });
   }
 };
 
-// Función para obtener las materias que cursa un alumno
-export const getMateriasByID = async (req, res) => {
+// Función para obtener las productos que cursa un perfil
+export const getproductosByID = async (req, res) => {
   try {
     const { dni } = req.params; // Suponiendo que el dni viene en los parámetros de la URL
     const cnn = await connect();
 
-    // Validar si el alumno existe
-    const alumnoExiste = await validate("dni", dni, "alumno", cnn);
-    if (!alumnoExiste) {
+    // Validar si el perfil existe
+    const perfilExiste = await validate("dni", dni, "perfil", cnn);
+    if (!perfilExiste) {
       return res
         .status(400)
-        .json({ message: "El alumno no existe", success: false });
+        .json({ message: "El perfil no existe", success: false });
     }
 
-    // Obtener las materias que cursa el alumno
+    // Obtener las productos que cursa el perfil
     const q = `
-      SELECT m.id_m, m.nombre_materia
+      SELECT m.id_m, m.nombre_producto
       FROM cursar c
-      JOIN materia m ON c.id_m = m.id_m
+      JOIN producto m ON c.id_m = m.id_m
       WHERE c.dni = ?
     `;
     const [result] = await cnn.query(q, [dni]);
 
     if (result.length === 0) {
       return res.status(404).json({
-        message: "No se encontraron materias para este alumno",
+        message: "No se encontraron productos para este perfil",
         success: false,
       });
     }
 
-    return res.status(200).json({ materias: result, success: true });
+    return res.status(200).json({ productos: result, success: true });
   } catch (error) {
     return res.status(500).json({ message: "Fallo en catch", error: error });
   }
