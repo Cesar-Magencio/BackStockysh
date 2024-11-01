@@ -2,6 +2,9 @@
 @login = http://localhost:3000/user/logIn
 @getproductos= http://localhost:3000/user/getproductos
 @createProducto = http://localhost:3000/user/createProducto
+
+@updateProducto = http://localhost:3000/user/updateProducto/1
+
 @Cursar = http://localhost:3000/user/Cursar
 
 @getproductosId = http://localhost:3000/user/getMproductosByID/1
@@ -21,32 +24,46 @@ Content-Type: application/json
 #body
 
 {
-    "dni":"6667",
-    "nombre":"juansito",
+    "dni":"66677",
+    "nombre":"juansito3",
     "contra":"1234"
 }
 
 ###
 
-GET {{{{getproductos}}}}
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3ODIsImV4cCI6My4zMzMzMzMzMzMzMzMzMzRlKzI5fQ.hzS9pe4_vb9cNVud6_1dN35x2GMSsPNylc5lmZ89aoQ
+GET {{getproductos}}
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzI5Njg5OTg0LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.z-SvlpiWvdz7O1vHJquHt_KWgU1X-GlcptFY56YcWuo
 ###
 
-POST {{{{createProducto}}}}
+POST {{createProducto}}
 Content-Type: application/json
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3ODIsImV4cCI6My4zMzMzMzMzMzMzMzMzMzRlKzI5fQ.hzS9pe4_vb9cNVud6_1dN35x2GMSsPNylc5lmZ89aoQ
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzMwMjkxMjQ4LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.hs8io7NBdcwP3R_BS4aHEvKh5D2lWKvlcmHNenehbu8
 
 {
-    "nombre_producto": "Cartera Juanita Jo"
+    "nombre_poducto": "Cartera Juanita Jo5",
+    "precio":"123",
+    "stock":"18"
 
+}
+
+##########################################################
+
+PUT {{updateProducto}}
+Content-Type: application/json
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzMwMjkxMjQ4LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.hs8io7NBdcwP3R_BS4aHEvKh5D2lWKvlcmHNenehbu8
+
+{
+    "nombre_poducto": "Cartera Juanita Jo",
+    "precio":"123444",
+    "stock":"4"
 }
 
 
 ##############################################
-
-POST {{Cursar}}
+####Podria usarlo paa asociar productos a usuarios, 
+POST {{Cursar}}  
 Content-Type: application/json
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3ODIsImV4cCI6My4zMzMzMzMzMzMzMzMzMzRlKzI5fQ.hzS9pe4_vb9cNVud6_1dN35x2GMSsPNylc5lmZ89aoQ
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzI5Njg5OTg0LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.z-SvlpiWvdz7O1vHJquHt_KWgU1X-GlcptFY56YcWuo
 
 {
     "dni": "666",
@@ -54,11 +71,11 @@ auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3O
 }
 
 
-#####################################################33
+#####################################################
 
 GET {{getproductosId}}
 Content-Type: application/json
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjYiLCJpYXQiOjE3Mjg0NzM3ODIsImV4cCI6My4zMzMzMzMzMzMzMzMzMzRlKzI5fQ.hzS9pe4_vb9cNVud6_1dN35x2GMSsPNylc5lmZ89aoQ
+auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzI5Njg5OTg0LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.z-SvlpiWvdz7O1vHJquHt_KWgU1X-GlcptFY56YcWuo
 
 
 

@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS perfil (
 -- Crear la tabla 'productos'
 CREATE TABLE productos (
   id_p INT PRIMARY KEY AUTO_INCREMENT,
-  nombre_poducto VARCHAR(100)
+  nombre_poducto VARCHAR(100),
+  precio INT(10),
+  stock INT(10)
 );
 
 /*

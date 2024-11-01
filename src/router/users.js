@@ -9,6 +9,7 @@ import {
   Cursar,
   getproductosByID,
   createProducto,
+  updateProducto,
 } from "../controller/users";
 
 //objeto para manejo de url
@@ -42,11 +43,21 @@ routerUsers.get("/user/getproductos", auth, getproductosbyDni);
 
 /**
  * @swagger
- * /materias:
+ * /productos:
  *  post:
- *      sumary: crea una materia
+ *      sumary: crea un producto
  */
 routerUsers.post("/user/createProducto", auth, createProducto);
+
+
+/**
+ * @swagger
+ * /productos:
+ *  post:
+ *      sumary: Modifica un producto
+ */
+routerUsers.put('/user/updateProducto/:id_p', auth,updateProducto);
+
 
 /**
  * @swagger
@@ -55,6 +66,8 @@ routerUsers.post("/user/createProducto", auth, createProducto);
  *      summary: Asigna materias a un usuario
  */
 routerUsers.post("/user/Cursar", auth, Cursar);
+
+
 
 /**
  * @swagger

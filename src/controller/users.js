@@ -108,48 +108,91 @@ export const getproductosbyDni = (req, res) => {
   return res.status(200).json(productos);
 };
 
-// Función para crear una producto en la base de datos
+
+
+// Función para crear un producto en la base de datos
+// users.controller.js
 export const createProducto = async (req, res) => {
   try {
     const cnn = await connect();
-    const { nombre_producto } = req.body;
+    const { nombre_poducto, precio, stock } = req.body;
 
+    // Validar si el producto ya existe en la base de datos
     const productoExistente = await validate(
-      "nombre_producto",
-      nombre_producto,
-      "producto",
+      "nombre_poducto",
+      nombre_poducto,
+      "productos",
       cnn
     );
 
     if (productoExistente) {
       return res
         .status(400)
-        .json({ message: "La producto ya existe", success: false });
+        .json({ message: "El producto ya existe", success: false });
     }
 
+    // Insertar el nuevo producto en la base de datos
     const [result] = await cnn.query(
-      "INSERT INTO producto (nombre_producto) VALUES (?)",
-      [nombre_producto]
+      "INSERT INTO productos (nombre_poducto, precio, stock) VALUES (?, ?, ?)",
+      [nombre_poducto, precio, stock]
     );
 
     if (result.affectedRows === 1) {
       return res
         .status(200)
-        .json({ message: "Se creó la producto", success: true });
+        .json({ message: "Se creó el producto", success: true });
     } else {
       return res
         .status(500)
-        .json({ message: "No se creó la producto", success: false });
+        .json({ message: "No se creó el producto", success: false });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
 
+
+
+
 ///////////////////////////////////////////////////////////////////////
 
-// Función para asignar productos a un perfil
-// Función para asignar productos a un perfil
+//Funcion para Modificar productos
+export const updateProducto = async (req, res) => {
+  try {
+    const cnn = await connect();
+    const { id_p } = req.params; // Obtenemos el ID del producto desde los parámetros de la ruta
+    const { nombre_poducto, precio, stock } = req.body;
+
+    // Verificar si el producto existe antes de intentar actualizarlo
+    const productoExistente = await validate("id_p", id_p, "productos", cnn);
+    if (!productoExistente) {
+      return res
+        .status(404)
+        .json({ message: "Producto no encontrado", success: false });
+    }
+
+    // Actualizar el producto en la base de datos
+    const [result] = await cnn.query(
+      "UPDATE productos SET nombre_poducto = ?, precio = ?, stock = ? WHERE id_p = ?",
+      [nombre_poducto, precio, stock, id_p]
+    );
+
+    if (result.affectedRows === 1) {
+      return res
+        .status(200)
+        .json({ message: "Producto actualizado exitosamente", success: true });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "No se pudo actualizar el producto", success: false });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+
+
 // Función para asignar productos a un perfil
 export const Cursar = async (req, res) => {
   try {
