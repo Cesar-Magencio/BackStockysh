@@ -4,12 +4,11 @@ import { Router } from "express";
 import {
   auth,
   createUsers,
-  getproductosbyDni,
   logIn,
-  Cursar,
-  getproductosByID,
   createProducto,
   updateProducto,
+  getProductos,
+  getSolicitudes,
 } from "../controller/users";
 
 //objeto para manejo de url
@@ -33,13 +32,8 @@ routerUsers.post("/user/login", logIn);
 
 routerUsers.post("/user/usersp", createUsers);
 
-/**
- * @swagger
- * /materias:
- *  post:
- *      sumary: devuelve las materias para un usuario determinado
- */
-routerUsers.get("/user/getproductos", auth, getproductosbyDni);
+// users.router.js
+routerUsers.get("/user/getProductos", auth, getProductos);
 
 /**
  * @swagger
@@ -59,22 +53,16 @@ routerUsers.post("/user/createProducto", auth, createProducto);
 routerUsers.put('/user/updateProducto/:id_p', auth,updateProducto);
 
 
+
 /**
  * @swagger
- * /user/Cursar:
+ * /productos:
  *  post:
- *      summary: Asigna materias a un usuario
+ *      sumary: Agarra las solicitudes para mostrarlselas al admin
  */
-routerUsers.post("/user/Cursar", auth, Cursar);
+routerUsers.get('/user/getSolicitudes',auth,getSolicitudes);
 
 
 
-/**
- * @swagger
- * /user/getMateriasByID/:dni:
- *  get:
- *      sumary: obtiene las materias que cursa un alumno por su DNI
- */
-routerUsers.get("/user/getproductosByID/:dni", auth, getproductosByID); // Añadir la nueva ruta
 
 export default routerUsers;

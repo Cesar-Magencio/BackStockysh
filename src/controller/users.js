@@ -18,7 +18,7 @@ const validate = async (campo, valor, tabla, cnn) => {
   return result.length === 1; // Devuelve true si existe un registro con el valor especificado
 };
 
-// Función para iniciar sesión
+
 // Función para iniciar sesión
 export const logIn = async (req, res) => {
   try {
@@ -94,18 +94,17 @@ export const auth = (req, res, next) => {
   });
 };
 
-// Función para obtener la lista de productos por DNI
-export const getproductosbyDni = (req, res) => {
-  const dni = req.payload;
-  console.log(dni);
-
-  const productos = [
-    { id: 1, nombre: "Zapatos Paruolo" },
-    { id: 2, nombre: "Vestido Maria Cher" },
-    { id: 3, nombre: "Tacos Sarkany" },
-    { id: 4, nombre: "Jean Ay Not Dead" },
-  ];
-  return res.status(200).json(productos);
+// Función para obtener la lista de productos por fecha 
+export const getProductos = async (req, res) => {
+  try {
+    const cnn = await connect();
+    const [rows] = await cnn.query(
+      "SELECT * FROM productos ORDER BY updated_at DESC"
+    );
+    res.status(200).json({ success: true, productos: rows });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 
@@ -114,42 +113,52 @@ export const getproductosbyDni = (req, res) => {
 // users.controller.js
 export const createProducto = async (req, res) => {
   try {
+    const { dni } = req.body; // Supongamos que el DNI del usuario está disponible en req.user
+    const { nombre_producto, precio, stock } = req.body;
+
+    console.log('Datos recibidos:', { dni, nombre_producto, precio, stock });
+
+    if (!nombre_producto || !precio || !stock) {
+      return res.status(400).json({ message: 'Todos los campos son requeridos' });
+    }
+
     const cnn = await connect();
-    const { nombre_poducto, precio, stock } = req.body;
 
-    // Validar si el producto ya existe en la base de datos
-    const productoExistente = await validate(
-      "nombre_poducto",
-      nombre_poducto,
-      "productos",
-      cnn
-    );
+    // Obtener el rol del usuario desde la base de datos
+    const [userResult] = await cnn.query('SELECT rol FROM perfil WHERE dni = ?', [dni]);
+    console.log('Resultado de la consulta de usuario:', userResult);
 
-    if (productoExistente) {
-      return res
-        .status(400)
-        .json({ message: "El producto ya existe", success: false });
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado', success: false });
     }
 
-    // Insertar el nuevo producto en la base de datos
+    const rol = userResult[0].rol;
+    const estado = (rol === 'admin') ? 'aprobado' : 'pendiente';
+
+    console.log('Rol del usuario:', rol);
+    console.log('Estado del producto:', estado);
+
+    // Crear el producto en la base de datos
     const [result] = await cnn.query(
-      "INSERT INTO productos (nombre_poducto, precio, stock) VALUES (?, ?, ?)",
-      [nombre_poducto, precio, stock]
+      'INSERT INTO productos (nombre_producto, precio, stock, estado) VALUES (?, ?, ?, ?)',
+      [nombre_producto, precio, stock, estado]
     );
 
-    if (result.affectedRows === 1) {
-      return res
-        .status(200)
-        .json({ message: "Se creó el producto", success: true });
-    } else {
-      return res
-        .status(500)
-        .json({ message: "No se creó el producto", success: false });
+    console.log('Resultado de la creación del producto:', result);
+
+    // Notificar al admin si el producto está pendiente
+    if (estado === 'pendiente') {
+      // Lógica de notificación (ej. envío de email)
+      console.log('Notificación al admin: producto en estado pendiente');
     }
+
+    res.status(201).json({ message: 'Producto creado', success: true });
   } catch (error) {
-    return res.status(500).json({ message: error.message, success: false });
+    console.error('Error al crear el producto:', error);
+    res.status(500).json({ message: 'Error al crear el producto', success: false });
   }
 };
+
 
 
 
@@ -159,116 +168,90 @@ export const createProducto = async (req, res) => {
 //Funcion para Modificar productos
 export const updateProducto = async (req, res) => {
   try {
+    const { dni } = req.body; // Supongamos que el DNI del usuario está disponible en req.user
     const cnn = await connect();
     const { id_p } = req.params; // Obtenemos el ID del producto desde los parámetros de la ruta
-    const { nombre_poducto, precio, stock } = req.body;
+    const { nombre_producto, precio, stock } = req.body;
 
     // Verificar si el producto existe antes de intentar actualizarlo
     const productoExistente = await validate("id_p", id_p, "productos", cnn);
     if (!productoExistente) {
-      return res
-        .status(404)
-        .json({ message: "Producto no encontrado", success: false });
+      return res.status(404).json({ message: "Producto no encontrado", success: false });
     }
 
-    // Actualizar el producto en la base de datos
-    const [result] = await cnn.query(
-      "UPDATE productos SET nombre_poducto = ?, precio = ?, stock = ? WHERE id_p = ?",
-      [nombre_poducto, precio, stock, id_p]
-    );
+    // Obtener el rol del usuario desde la base de datos
+    const [userResult] = await cnn.query('SELECT rol FROM perfil WHERE dni = ?', [dni]);
 
-    if (result.affectedRows === 1) {
-      return res
-        .status(200)
-        .json({ message: "Producto actualizado exitosamente", success: true });
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado', success: false });
+    }
+
+    const rol = userResult[0].rol;
+
+    if (rol === 'admin') {
+      // Si el usuario es admin o superusuario, se actualiza el producto directamente
+      const [result] = await cnn.query(
+        "UPDATE productos SET nombre_producto = ?, precio = ?, stock = ? WHERE id_p = ?",
+        [nombre_producto, precio, stock, id_p]
+      );
+
+      if (result.affectedRows === 1) {
+        return res.status(200).json({ message: "Producto actualizado exitosamente", success: true });
+      } else {
+        return res.status(500).json({ message: "No se pudo actualizar el producto", success: false });
+      }
     } else {
-      return res
-        .status(500)
-        .json({ message: "No se pudo actualizar el producto", success: false });
+      // Si el usuario no es admin, enviar una solicitud al admin
+      const estado = 'pendiente'; // Estado de la solicitud
+      const [requestResult] = await cnn.query(
+        "INSERT INTO solicitudes (dni_usuario, id_producto, estado) VALUES (?, ?, ?)",
+        [dni, id_p, estado]
+      );
+
+      if (requestResult.affectedRows === 1) {
+        return res.status(202).json({ message: "Solicitud de actualización enviada al administrador", success: true });
+      } else {
+        return res.status(500).json({ message: "No se pudo enviar la solicitud", success: false });
+      }
     }
   } catch (error) {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
 
-
-
-// Función para asignar productos a un perfil
-export const Cursar = async (req, res) => {
+export const getSolicitudes = async (req, res) => {
   try {
-    const { dni, productos_ids } = req.body;
+    const { dni } = req.body; // Obtener el DNI del cuerpo de la solicitud
+
+    if (!dni) {
+      return res.status(400).json({ message: 'DNI requerido', success: false });
+    }
+
     const cnn = await connect();
 
-    // Validar si el perfil existe
-    const perfilExiste = await validate("dni", dni, "perfil", cnn);
-    if (!perfilExiste) {
-      return res
-        .status(400)
-        .json({ message: "El perfil no existe", success: false });
+    // Obtener el rol del usuario desde la base de datos
+    const [userResult] = await cnn.query('SELECT rol FROM perfil WHERE dni = ?', [dni]);
+    console.log('Resultado de la consulta de usuario:', userResult);
+
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado', success: false });
     }
 
-    // Asignar productos al perfil
-    for (const id_m of productos_ids) {
-      const productoExiste = await validate("id_m", id_m, "producto", cnn);
-      if (!productoExiste) {
-        return res.status(400).json({
-          message: `La producto con id ${id_m} no existe`,
-          success: false,
-        });
-      }
+    const rol = userResult[0].rol;
+    console.log('Rol del usuario:', rol); // Para depuración
 
-      // Insertar relación en la tabla "cursar"
-      const q = `INSERT INTO cursar (dni, id_m) VALUES (?,?)`;
-      const [result] = await cnn.query(q, [dni, id_m]);
 
-      if (result.affectedRows !== 1) {
-        return res.status(500).json({
-          message: `No se pudo asignar la producto con id ${id_m} al perfil`,
-          success: false,
-        });
-      }
-    }
 
-    return res
-      .status(200)
-      .json({ message: "productos asignadas correctamente", success: true });
-  } catch (error) {
-    return res.status(500).json({ message: "Fallo en catch", error: error });
-  }
-};
-
-// Función para obtener las productos que cursa un perfil
-export const getproductosByID = async (req, res) => {
-  try {
-    const { dni } = req.params; // Suponiendo que el dni viene en los parámetros de la URL
-    const cnn = await connect();
-
-    // Validar si el perfil existe
-    const perfilExiste = await validate("dni", dni, "perfil", cnn);
-    if (!perfilExiste) {
-      return res
-        .status(400)
-        .json({ message: "El perfil no existe", success: false });
-    }
-
-    // Obtener las productos que cursa el perfil
-    const q = `
-      SELECT m.id_m, m.nombre_producto
-      FROM cursar c
-      JOIN producto m ON c.id_m = m.id_m
-      WHERE c.dni = ?
-    `;
-    const [result] = await cnn.query(q, [dni]);
+    // Obtener los productos en estado pendiente
+    const [result] = await cnn.query('SELECT * FROM productos WHERE estado = "pendiente"');
 
     if (result.length === 0) {
-      return res.status(404).json({
-        message: "No se encontraron productos para este perfil",
-        success: false,
-      });
+      return res.status(404).json({ message: 'No hay solicitudes pendientes', success: false });
     }
 
-    return res.status(200).json({ productos: result, success: true });
+    res.status(200).json({ success: true, solicitudes: result });
   } catch (error) {
-    return res.status(500).json({ message: "Fallo en catch", error: error });
+    console.error("Error al obtener las solicitudes:", error);
+    res.status(500).json({ message: 'Error al obtener las solicitudes', success: false });
   }
 };

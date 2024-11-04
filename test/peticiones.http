@@ -1,7 +1,8 @@
 @usersp = http://localhost:3000/user/usersp
 @login = http://localhost:3000/user/logIn
-@getproductos= http://localhost:3000/user/getproductos
+@getProductos= http://localhost:3000/user/getProductos
 @createProducto = http://localhost:3000/user/createProducto
+@getSolicitudes = http://localhost:3000/user/getSolicitudes
 
 @updateProducto = http://localhost:3000/user/updateProducto/1
 
@@ -26,12 +27,14 @@ Content-Type: application/json
 {
     "dni":"66677",
     "nombre":"juansito3",
-    "contra":"1234"
+    "contra":"1234",
+    "rol":"admin",
+    "email":"genarotrujillo017@gmail.com"
 }
 
 ###
 
-GET {{getproductos}}
+GET {{getProductos}}
 auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzI5Njg5OTg0LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.z-SvlpiWvdz7O1vHJquHt_KWgU1X-GlcptFY56YcWuo
 ###
 
@@ -40,7 +43,7 @@ Content-Type: application/json
 auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzMwMjkxMjQ4LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.hs8io7NBdcwP3R_BS4aHEvKh5D2lWKvlcmHNenehbu8
 
 {
-    "nombre_poducto": "Cartera Juanita Jo5",
+    "nombre_producto": "Cartera Juanita Jo5",
     "precio":"123",
     "stock":"18"
 
@@ -53,29 +56,13 @@ Content-Type: application/json
 auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzMwMjkxMjQ4LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.hs8io7NBdcwP3R_BS4aHEvKh5D2lWKvlcmHNenehbu8
 
 {
-    "nombre_poducto": "Cartera Juanita Jo",
+    "nombre_producto": "Cartera Juanita Jo",
     "precio":"123444",
     "stock":"4"
 }
 
+####################
 
-##############################################
-####Podria usarlo paa asociar productos a usuarios, 
-POST {{Cursar}}  
-Content-Type: application/json
+GET {{getSolicitudes}}
 auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzI5Njg5OTg0LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.z-SvlpiWvdz7O1vHJquHt_KWgU1X-GlcptFY56YcWuo
-
-{
-    "dni": "666",
-    "materias_ids": [1, 2 ]
-}
-
-
-#####################################################
-
-GET {{getproductosId}}
-Content-Type: application/json
-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzI5Njg5OTg0LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.z-SvlpiWvdz7O1vHJquHt_KWgU1X-GlcptFY56YcWuo
-
-
-
+###
