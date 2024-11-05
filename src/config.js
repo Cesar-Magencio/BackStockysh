@@ -7,4 +7,5 @@ export const config = {
   password: process.env.DB_PASS,
   database: process.env.DB_DATABASE,
   port: process.env.DB_PORT,
+  connectTimeout: 10000,
 };

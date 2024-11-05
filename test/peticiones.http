@@ -4,6 +4,10 @@
 @createProducto = http://localhost:3000/user/createProducto
 @getSolicitudes = http://localhost:3000/user/getSolicitudes
 
+@aceptar = http://localhost:3000/user/aceptarSolicitud
+
+@rechazar = http://localhost:3000/user/rechazarSolicitud
+
 @updateProducto = http://localhost:3000/user/updateProducto/1
 
 @Cursar = http://localhost:3000/user/Cursar
@@ -66,3 +70,5 @@ auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzMwMjkxM
 GET {{getSolicitudes}}
 auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOiI2NjY3IiwiaWF0IjoxNzI5Njg5OTg0LCJleHAiOjMuMzMzMzMzMzMzMzMzMzM0ZSsyOX0.z-SvlpiWvdz7O1vHJquHt_KWgU1X-GlcptFY56YcWuo
 ###
+
+

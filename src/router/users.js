@@ -9,6 +9,8 @@ import {
   updateProducto,
   getProductos,
   getSolicitudes,
+  aceptarSolicitud,
+  rechazarSolicitud,
 } from "../controller/users";
 
 //objeto para manejo de url
@@ -60,9 +62,25 @@ routerUsers.put('/user/updateProducto/:id_p', auth,updateProducto);
  *  post:
  *      sumary: Agarra las solicitudes para mostrarlselas al admin
  */
-routerUsers.get('/user/getSolicitudes',auth,getSolicitudes);
+routerUsers.post('/user/getSolicitudes',auth,getSolicitudes);
 
 
+/**
+ * @swagger
+ * /productos:
+ *  post:
+ *      sumary: Acepta las solicitudes
+ */
+routerUsers.post('/user/aceptarSolicitud/:id_p', auth, aceptarSolicitud);
+
+
+/**
+ * @swagger
+ * /productos:
+ *  post:
+ *      sumary: Rechaza las solicitudes
+ */
+routerUsers.post('/user/rechazarSolicitud/:id_p', auth, rechazarSolicitud);
 
 
 export default routerUsers;

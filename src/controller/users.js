@@ -24,30 +24,41 @@ export const logIn = async (req, res) => {
   try {
     const { dni, contra } = req.body;
     const connection = await connect();
-    const q = "SELECT contra FROM perfil WHERE dni=?";
+    const q = "SELECT contra, rol FROM perfil WHERE dni=?"; // Incluir el campo rol en la consulta
     const value = [dni];
     const [result] = await connection.query(q, value);
 
     if (result.length > 0) {
       if (result[0].contra === contra) {
         const token = getToken({ dni: dni });
-        return res
-          .status(200)
-          .json({ message: "correcto", success: true, token: token });
+        const userRol = result[0].rol; // Obtener el rol del resultado
+
+        return res.status(200).json({
+          message: "correcto",
+          success: true,
+          token: token,
+          rol: userRol // Incluir el rol en la respuesta
+        });
       } else {
-        return res
-          .status(401)
-          .json({ message: "la contraseña no coincide", success: false });
+        return res.status(401).json({
+          message: "la contraseña no coincide",
+          success: false
+        });
       }
     } else {
-      return res
-        .status(400)
-        .json({ message: "el usuario no existe", success: false });
+      return res.status(400).json({
+        message: "el usuario no existe",
+        success: false
+      });
     }
   } catch (error) {
-    res.status(500).json({ message: "fallo en el catch", error: error });
+    res.status(500).json({
+      message: "fallo en el catch",
+      error: error
+    });
   }
 };
+
 
 // Función para crear usuarios desde el signup
 export const createUsers = async (req, res) => {
@@ -240,18 +251,47 @@ export const getSolicitudes = async (req, res) => {
     const rol = userResult[0].rol;
     console.log('Rol del usuario:', rol); // Para depuración
 
-
-
     // Obtener los productos en estado pendiente
     const [result] = await cnn.query('SELECT * FROM productos WHERE estado = "pendiente"');
 
     if (result.length === 0) {
-      return res.status(404).json({ message: 'No hay solicitudes pendientes', success: false });
+      return res.status(200).json({ success: true, message: 'No hay solicitudes pendientes', solicitudes: [] });
     }
 
     res.status(200).json({ success: true, solicitudes: result });
   } catch (error) {
-    console.error("Error al obtener las solicitudes:", error);
+    console.error("Error al obtener las solicitudes:", error.message);
     res.status(500).json({ message: 'Error al obtener las solicitudes', success: false });
+  }
+};
+
+
+
+export const aceptarSolicitud = async (req, res) => {
+  const { id_p } = req.params; // Obtener el ID de la solicitud de los parámetros
+  try {
+    const cnn = await connect();
+    await cnn.query('UPDATE productos SET estado = "aceptado" WHERE id_p = ?', [id_p]);
+    res.status(200).json({ success: true, message: 'Solicitud aceptada' });
+  } catch (error) {
+    console.error("Error al aceptar la solicitud:", error);
+    res.status(500).json({ success: false, message: 'Error al aceptar la solicitud' });
+  }
+};
+
+export const rechazarSolicitud = async (req, res) => {
+  const { id_p } = req.params; // Obtener el ID de la solicitud de los parámetros
+  try {
+    const cnn = await connect();
+    const [result] = await cnn.query('DELETE FROM productos WHERE id_p = ?', [id_p]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Solicitud no encontrada' });
+    }
+    
+    res.status(200).json({ success: true, message: 'Solicitud rechazada y producto eliminado' });
+  } catch (error) {
+    console.error("Error al rechazar la solicitud:", error);
+    res.status(500).json({ success: false, message: 'Error al rechazar la solicitud', error: error.message });
   }
 };
