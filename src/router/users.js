@@ -11,6 +11,7 @@ import {
   getSolicitudes,
   aceptarSolicitud,
   rechazarSolicitud,
+  modificarUsuario,
 } from "../controller/users";
 
 //objeto para manejo de url
@@ -81,6 +82,14 @@ routerUsers.post('/user/aceptarSolicitud/:id_p', auth, aceptarSolicitud);
  *      sumary: Rechaza las solicitudes
  */
 routerUsers.post('/user/rechazarSolicitud/:id_p', auth, rechazarSolicitud);
+
+/**
+ * @swagger
+ * /user/modificarUsuario:
+ *  put:
+ *      summary: Modifica los datos del usuario
+ */
+routerUsers.put('/user/modificarUsuario/:dni', auth, modificarUsuario);
 
 
 export default routerUsers;

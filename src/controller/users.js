@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { connect } from "../databases";
+import bcrypt from 'bcrypt';
 const clavesecreta = process.env.SECRET_KEY;
 
 // Función para generar un token JWT
@@ -24,66 +25,77 @@ export const logIn = async (req, res) => {
   try {
     const { dni, contra } = req.body;
     const connection = await connect();
-    const q = "SELECT contra, rol FROM perfil WHERE dni=?"; // Incluir el campo rol en la consulta
+
+    // Modificar la consulta para incluir los campos 'nombre' y 'email'
+    const q = "SELECT contra, rol, nombre, email FROM perfil WHERE dni=?";
     const value = [dni];
     const [result] = await connection.query(q, value);
 
     if (result.length > 0) {
-      if (result[0].contra === contra) {
+      // Comparar la contraseña ingresada con el hash almacenado en la base de datos
+      const passwordMatch = await bcrypt.compare(contra, result[0].contra);
+
+      if (passwordMatch) {
         const token = getToken({ dni: dni });
         const userRol = result[0].rol; // Obtener el rol del resultado
+        const userNombre = result[0].nombre; // Obtener el nombre
+        const userEmail = result[0].email; // Obtener el email
 
         return res.status(200).json({
-          message: "correcto",
+          message: "Login correcto",
           success: true,
           token: token,
-          rol: userRol // Incluir el rol en la respuesta
+          rol: userRol, // Incluir el rol en la respuesta
+          nombre: userNombre, // Incluir el nombre en la respuesta
+          email: userEmail // Incluir el email en la respuesta
         });
       } else {
         return res.status(401).json({
-          message: "la contraseña no coincide",
+          message: "La contraseña no coincide",
           success: false
         });
       }
     } else {
       return res.status(400).json({
-        message: "el usuario no existe",
+        message: "El usuario no existe",
         success: false
       });
     }
   } catch (error) {
     res.status(500).json({
-      message: "fallo en el catch",
+      message: "Error en el servidor",
       error: error
     });
   }
 };
 
 
+
 // Función para crear usuarios desde el signup
 export const createUsers = async (req, res) => {
   try {
     const cnn = await connect();
-    const { dni, nombre, contra } = req.body;
+    const { dni, nombre, contra, email } = req.body;
 
+    // Verificar si el usuario ya existe
     const userExist = await validate("dni", dni, "perfil", cnn);
     if (userExist) {
-      return res.status(400).json({ message: "el usuario ya existe" });
+      return res.status(400).json({ message: "El usuario ya existe" });
     }
 
+    // Hashear la contraseña
+    const hashedPassword = await bcrypt.hash(contra, 10); // 10 es el número de rondas de salting
+
+    // Guardar el nuevo usuario con la contraseña hasheada
     const [result] = await cnn.query(
-      "INSERT INTO perfil (dni, nombre, contra) VALUES (?, ?, ?)",
-      [dni, nombre, contra]
+      "INSERT INTO perfil (dni, nombre, contra, email) VALUES (?, ?, ?, ?)",
+      [dni, nombre, hashedPassword, email]  // Almacenar el hash de la contraseña
     );
 
     if (result.affectedRows === 1) {
-      return res
-        .status(200)
-        .json({ message: "se creo el usuario", success: true });
+      return res.status(200).json({ message: "Usuario creado correctamente", success: true });
     } else {
-      return res
-        .status(500)
-        .json({ message: "El usuario no se creo", success: false });
+      return res.status(500).json({ message: "No se pudo crear el usuario", success: false });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message, success: false });
@@ -295,3 +307,55 @@ export const rechazarSolicitud = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error al rechazar la solicitud', error: error.message });
   }
 };
+
+
+// Función para modificar el usuario
+export const modificarUsuario = async (req, res) => {
+  try {
+    const dni = req.params.dni; // Obtener DNI desde los parámetros de la URL
+    const { nombre, email, contra, nuevoDni } = req.body; // Recibir los campos a actualizar
+
+    const connection = await connect();
+
+    // Construir la consulta SQL para la actualización
+    const updateQuery = `
+      UPDATE perfil 
+      SET 
+        nombre = COALESCE(?, nombre), 
+        email = COALESCE(?, email), 
+        contra = COALESCE(?, contra), 
+        dni = COALESCE(?, dni)
+      WHERE dni = ?
+    `;
+    
+    // Los valores de los campos a actualizar
+    const values = [nombre, email, contra, nuevoDni, dni];
+
+    const [result] = await connection.query(updateQuery, values);
+
+    if (result.affectedRows > 0) {
+      return res.status(200).json({
+        message: "Usuario actualizado correctamente",
+        success: true
+      });
+    } else {
+      return res.status(400).json({
+        message: "No se encontró el usuario o no hubo cambios",
+        success: false
+      });
+    }
+  } catch (error) {
+    console.error("Error al actualizar el usuario:", error);
+    res.status(500).json({
+      message: "Error en el servidor",
+      error: error
+    });
+  }
+};
+
+
+
+
+
+
+
