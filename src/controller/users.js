@@ -214,12 +214,12 @@ export const createProducto = async (req, res) => {
 //Funcion para Modificar productos
 export const updateProducto = async (req, res) => {
   try {
-    const { dni } = req.body; // Supongamos que el DNI del usuario está disponible en req.user
+    const { dni } = req.body; // DNI del usuario
     const cnn = await connect();
-    const { id_p } = req.params; // Obtenemos el ID del producto desde los parámetros de la ruta
-    const { nombre_producto, precio, stock } = req.body;
+    const { id_p } = req.params; // ID del producto que se está editando
+    const { nombre_producto, precio, stock } = req.body; // Datos del producto
 
-    // Verificar si el producto existe antes de intentar actualizarlo
+    // Verificar si el producto existe
     const productoExistente = await validate("id_p", id_p, "productos", cnn);
     if (!productoExistente) {
       return res.status(404).json({ message: "Producto no encontrado", success: false });
@@ -235,7 +235,7 @@ export const updateProducto = async (req, res) => {
     const rol = userResult[0].rol;
 
     if (rol === 'admin') {
-      // Si el usuario es admin o superusuario, se actualiza el producto directamente
+      // Si el usuario es admin, actualizar el producto directamente
       const [result] = await cnn.query(
         "UPDATE productos SET nombre_producto = ?, precio = ?, stock = ? WHERE id_p = ?",
         [nombre_producto, precio, stock, id_p]
@@ -247,7 +247,7 @@ export const updateProducto = async (req, res) => {
         return res.status(500).json({ message: "No se pudo actualizar el producto", success: false });
       }
     } else {
-      // Si el usuario no es admin, enviar una solicitud al admin
+      // Si el usuario no es admin, crear una solicitud con estado 'pendiente'
       const estado = 'pendiente'; // Estado de la solicitud
       const [requestResult] = await cnn.query(
         "INSERT INTO solicitudes (dni_usuario, id_p, estado) VALUES (?, ?, ?)",
@@ -261,10 +261,10 @@ export const updateProducto = async (req, res) => {
       }
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message, success: false });
+    console.error(error);
+    return res.status(500).json({ message: error.message || "Error desconocido", success: false });
   }
 };
-
 export const getSolicitudes = async (req, res) => {
   try {
     const { dni } = req.body; // Obtener el DNI del cuerpo de la solicitud
@@ -338,6 +338,12 @@ export const modificarUsuario = async (req, res) => {
     const dni = req.params.dni; // Obtener DNI desde los parámetros de la URL
     const { nombre, email, contra, nuevoDni } = req.body; // Recibir los campos a actualizar
 
+    // Si se proporciona una nueva contraseña, hashearla
+    let hashedPassword = contra;
+    if (contra) {
+      hashedPassword = await bcrypt.hash(contra, 10); // Hasheamos la nueva contraseña
+    }
+
     const connection = await connect();
 
     // Construir la consulta SQL para la actualización
@@ -352,7 +358,7 @@ export const modificarUsuario = async (req, res) => {
     `;
     
     // Los valores de los campos a actualizar
-    const values = [nombre, email, contra, nuevoDni, dni];
+    const values = [nombre, email, hashedPassword, nuevoDni, dni];
 
     const [result] = await connection.query(updateQuery, values);
 
@@ -375,6 +381,51 @@ export const modificarUsuario = async (req, res) => {
     });
   }
 };
+
+export const deleteProducto = async (req, res) => {
+  try {
+    // Obtener el DNI y el id_p desde el cuerpo de la solicitud
+    const { dni, id_p } = req.body; 
+
+    // Establecer la conexión a la base de datos
+    const cnn = await connect();  // Asegúrate de que esta función esté correctamente configurada
+
+    // Obtener el rol del usuario desde la base de datos
+    const [userResult] = await cnn.query('SELECT rol FROM perfil WHERE dni = ?', [dni]);
+    console.log('Resultado de la consulta de usuario:', userResult);
+
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado', success: false });
+    }
+
+    const rol = userResult[0].rol; // Asumimos que el rol está en la primera fila
+
+    // Verificar que el rol sea 'admin'
+    if (rol !== 'admin') {
+      return res.status(403).json({ message: 'No tienes permisos para eliminar productos', success: false });
+    }
+
+    // Verificar si el producto existe antes de intentar borrarlo
+    const [productoExistente] = await cnn.query('SELECT * FROM productos WHERE id_p = ?', [id_p]);
+
+    if (productoExistente.length === 0) {
+      return res.status(404).json({ message: 'Producto no encontrado', success: false });
+    }
+
+    // Eliminar el producto de la base de datos
+    const [result] = await cnn.query('DELETE FROM productos WHERE id_p = ?', [id_p]);
+
+    if (result.affectedRows === 1) {
+      return res.status(200).json({ message: 'Producto eliminado exitosamente', success: true });
+    } else {
+      return res.status(500).json({ message: 'No se pudo eliminar el producto', success: false });
+    }
+  } catch (error) {
+    console.error('Error al eliminar el producto:', error);
+    return res.status(500).json({ message: 'Error al eliminar el producto', success: false });
+  }
+};
+
 
 
 

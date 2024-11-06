@@ -13,6 +13,7 @@ import {
   rechazarSolicitud,
   modificarUsuario,
   getProductoById,
+  deleteProducto,
 } from "../controller/users";
 
 //objeto para manejo de url
@@ -100,5 +101,13 @@ routerUsers.put('/user/modificarUsuario/:dni', auth, modificarUsuario);
  *      summary: Busca Producto por id
  */
 routerUsers.get('/user/getProductoById/:id', auth,getProductoById);
+
+/**
+ * @swagger
+ * /productos:
+ *  put:
+ *      sumary: elimina productos
+ */
+routerUsers.delete('/user/deleteProducto/:id_p', auth, deleteProducto);
 
 export default routerUsers;
