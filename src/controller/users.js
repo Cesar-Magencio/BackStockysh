@@ -131,6 +131,29 @@ export const getProductos = async (req, res) => {
 };
 
 
+// Función para obtener un producto por id_p
+export const getProductoById = async (req, res) => {
+  try {
+    const { id } = req.params; // Obtener el id del producto de los parámetros de la URL
+    const cnn = await connect();
+    const [rows] = await cnn.query(
+      "SELECT * FROM productos WHERE id_p = ?",
+      [id] // El valor del id se pasa como parámetro para evitar inyecciones SQL
+    );
+
+    // Verificar si se encontró el producto
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Producto no encontrado" });
+    }
+
+    res.status(200).json({ success: true, producto: rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
 
 // Función para crear un producto en la base de datos
 // users.controller.js
@@ -227,7 +250,7 @@ export const updateProducto = async (req, res) => {
       // Si el usuario no es admin, enviar una solicitud al admin
       const estado = 'pendiente'; // Estado de la solicitud
       const [requestResult] = await cnn.query(
-        "INSERT INTO solicitudes (dni_usuario, id_producto, estado) VALUES (?, ?, ?)",
+        "INSERT INTO solicitudes (dni_usuario, id_p, estado) VALUES (?, ?, ?)",
         [dni, id_p, estado]
       );
 

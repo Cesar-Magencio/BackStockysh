@@ -15,6 +15,7 @@
 @getproductosId = http://localhost:3000/user/getMproductosByID/1
 
 @modificarUsuario = http://localhost:3000/user/modificarUsuario/:dni
+@getproductobyid = http://localhost:3000/user/getProductoById/:id_p
 
 POST {{login}}
 Content-Type: application/json

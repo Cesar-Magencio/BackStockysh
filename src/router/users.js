@@ -12,6 +12,7 @@ import {
   aceptarSolicitud,
   rechazarSolicitud,
   modificarUsuario,
+  getProductoById,
 } from "../controller/users";
 
 //objeto para manejo de url
@@ -91,5 +92,13 @@ routerUsers.post('/user/rechazarSolicitud/:id_p', auth, rechazarSolicitud);
  */
 routerUsers.put('/user/modificarUsuario/:dni', auth, modificarUsuario);
 
+
+/**
+ * @swagger
+ * /user/modificarUsuario:
+ *  put:
+ *      summary: Busca Producto por id
+ */
+routerUsers.get('/user/getProductoById/:id', auth,getProductoById);
 
 export default routerUsers;
