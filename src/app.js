@@ -11,7 +11,7 @@ import rutas from "./router/users";
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:8081' })); // Cambia el puerto según el de tu frontend
+app.use(cors()); // Cambia el puerto según el de tu frontend
 app.use(morgan("dev"));
 app.use(express.json());
 
