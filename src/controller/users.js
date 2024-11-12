@@ -81,8 +81,8 @@ export const createUsers = async (req, res) => {
     const { dni, nombre, contra, email } = req.body;
 
     // Verificar si el usuario ya existe en la tabla perfil
-    const [existingUser] = await cnn.query("SELECT 1 FROM perfil WHERE dni = ? LIMIT 1", [dni]);
-    if (existingUser.length > 0) {
+    const [existingUser] = await cnn.query("SELECT * FROM perfil WHERE dni = ? LIMIT 1", [dni]);
+    if (existingUser && existingUser.length > 0) {
       return res.status(400).json({ message: "El usuario ya existe" });
     }
 
@@ -95,19 +95,13 @@ export const createUsers = async (req, res) => {
       [dni, nombre, hashedPassword, email, "user"]
     );
 
-    // Confirmar que se creó el usuario correctamente
     if (result.affectedRows === 1) {
-      // Crear token JWT
-      const token = jwt.sign({ dni }, clavesecreta, { expiresIn: '1' });
-
-      // Responder con los datos del usuario creado
       return res.status(200).json({
         message: "Usuario creado correctamente",
         success: true,
-        token: token,
-        rol: "user", // Asignar rol de usuario por defecto
+        rol: "user",
         nombre: nombre,
-        email: email
+        email: email,
       });
     } else {
       return res.status(500).json({ message: "No se pudo crear el usuario", success: false });
@@ -116,6 +110,7 @@ export const createUsers = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+
 
 
 // Función para autenticar el token
