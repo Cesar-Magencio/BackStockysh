@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { connect } from "../databases";
 import bcrypt from 'bcrypt';
+
 const clavesecreta = process.env.SECRET_KEY;
 
 // Función para generar un token JWT
@@ -71,29 +72,43 @@ export const logIn = async (req, res) => {
 
 
 
+
+
 // Función para crear usuarios desde el signup
 export const createUsers = async (req, res) => {
   try {
     const cnn = await connect();
     const { dni, nombre, contra, email } = req.body;
 
-    // Verificar si el usuario ya existe
-    const userExist = await validate("dni", dni, "perfil", cnn);
-    if (userExist) {
+    // Verificar si el usuario ya existe en la tabla perfil
+    const [existingUser] = await cnn.query("SELECT 1 FROM perfil WHERE dni = ? LIMIT 1", [dni]);
+    if (existingUser.length > 0) {
       return res.status(400).json({ message: "El usuario ya existe" });
     }
 
     // Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(contra, 10); // 10 es el número de rondas de salting
+    const hashedPassword = await bcrypt.hash(contra, 10);
 
-    // Guardar el nuevo usuario con la contraseña hasheada
+    // Guardar el nuevo usuario con el rol de "user" por defecto
     const [result] = await cnn.query(
-      "INSERT INTO perfil (dni, nombre, contra, email) VALUES (?, ?, ?, ?)",
-      [dni, nombre, hashedPassword, email]  // Almacenar el hash de la contraseña
+      "INSERT INTO perfil (dni, nombre, contra, email, rol) VALUES (?, ?, ?, ?, ?)",
+      [dni, nombre, hashedPassword, email, "user"]
     );
 
+    // Confirmar que se creó el usuario correctamente
     if (result.affectedRows === 1) {
-      return res.status(200).json({ message: "Usuario creado correctamente", success: true });
+      // Crear token JWT
+      const token = jwt.sign({ dni }, clavesecreta, { expiresIn: '1' });
+
+      // Responder con los datos del usuario creado
+      return res.status(200).json({
+        message: "Usuario creado correctamente",
+        success: true,
+        token: token,
+        rol: "user", // Asignar rol de usuario por defecto
+        nombre: nombre,
+        email: email
+      });
     } else {
       return res.status(500).json({ message: "No se pudo crear el usuario", success: false });
     }
@@ -101,6 +116,7 @@ export const createUsers = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+
 
 // Función para autenticar el token
 export const auth = (req, res, next) => {
